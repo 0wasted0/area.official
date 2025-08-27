@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Area Official — Giriş / Kayıt</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="centered-page">
+  <div class="card auth-card">
+    <div class="brand">Area Official</div>
+    <div class="auth-columns">
+      <div class="auth-box">
+        <h2>Giriş</h2>
+        <input id="loginUser" placeholder="Kullanıcı adı" />
+        <input id="loginPass" placeholder="Şifre" type="password" />
+        <div class="row">
+          <button class="btn primary" id="btnLogin">Giriş Yap</button>
+          <button class="btn ghost" id="btnToRegister">Kayıt Ol</button>
+        </div>
+        <div id="loginMsg" class="muted"></div>
+      </div>
+
+      <div class="auth-box">
+        <h2>Kayıt</h2>
+        <input id="regUser" placeholder="Kullanıcı adı" />
+        <input id="regPass" placeholder="Şifre (en az 8 karakter)" type="password" />
+        <div class="small muted">Şifre en az 8 karakter, Büyük Harf, Küçük Harf, Rakam ve Özel Karakter içermeli.</div>
+        <div class="row">
+          <button class="btn primary" id="btnRegister">Kayıt Ol</button>
+        </div>
+        <div id="regMsg" class="muted"></div>
+      </div>
+    </div>
+
+    <div class="foot muted small">
+      <div>Bu uygulama offline (LocalStorage) çalışır. Gerçek ödeme / güvenlik için sunucu ve ödeme sağlayıcı entegrasyonu gereklidir.</div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

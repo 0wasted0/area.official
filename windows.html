@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Area Official — Windows İndir</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="os-page windows-bg">
+  <header class="topbar small">
+    <div class="logo">Area Official — Windows</div>
+    <nav>
+      <a href="dashboard.html" class="navlink">Panel</a>
+      <a href="linux.html" class="navlink">Linux</a>
+      <a href="mac.html" class="navlink">Mac</a>
+      <a href="#" id="logoutWin" class="navlink">Çıkış</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>siteDEEP / site3 / site-tam — Windows</h2>
+      <p class="muted">Windows için özel yönergeler ve uyumluluk notları burada yer alır.</p>
+
+      <div class="download-row">
+        <div class="download-card">
+          <div class="label">siteDEEP</div>
+          <p class="muted small">Tam sürüm — tüm özellikler.</p>
+          <div class="row">
+            <button class="btn primary oval" onclick="downloadFromOS('siteDEEP.html')">İndir</button>
+          </div>
+        </div>
+
+        <div class="download-card">
+          <div class="label">site3 <span class="demo-badge">Demo</span></div>
+          <p class="muted small">Bazı özellikler demo olabilir.</p>
+          <div class="row">
+            <button class="btn primary oval" onclick="downloadFromOS('site3.html')">İndir (Demo)</button>
+          </div>
+        </div>
+
+        <div class="download-card">
+          <div class="label">site-tam</div>
+          <p class="muted small">Hafif sürüm — temel özellikler.</p>
+          <div class="row">
+            <button class="btn primary oval" onclick="downloadFromOS('site-tam.html')">İndir</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card tools">
+      <div class="tool">
+        <h3>Saat</h3>
+        <div id="clockWin" class="clock big"></div>
+      </div>
+
+      <div class="tool">
+        <h3>Kronometre</h3>
+        <div class="stopwatch">
+          <div id="swTimeWin">00:00:00.0</div>
+          <div class="row">
+            <button class="btn" id="swStartWin">Başlat</button>
+            <button class="btn" id="swStopWin">Dur</button>
+            <button class="btn" id="swResetWin">Sıfırla</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool">
+        <h3>Takvim</h3>
+        <div id="calendarWin"></div>
+        <div class="muted small">Güne tıklayarak not ekleyebilirsiniz; notlar tarayıcıda saklanır.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer small">© Area Official · Windows sayfası · Telif ve güvenlik uyarıları geçerlidir.</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

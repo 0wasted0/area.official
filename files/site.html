@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Saat Uygulaması</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --text-color: #2c3e50;
+            --bg-color: #ecf0f1;
+            --card-bg: #ffffff;
+            --shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary-color: #2980b9;
+            --secondary-color: #27ae60;
+            --accent-color: #c0392b;
+            --text-color: #ecf0f1;
+            --bg-color: #2c3e50;
+            --card-bg: #34495e;
+            --shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #clockCanvas {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            margin: 20px 0;
+            border: 3px solid var(--primary-color);
+        }
+
+        .digital-clock {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+            text-align: center;
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+        }
+
+        .date-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        .theme-btn {
+            background: var(--accent-color);
+        }
+
+        .ui-toggle-btn {
+            background: var(--secondary-color);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .widget {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .widget-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quick-access {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .quick-btn {
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--primary-color);
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quick-btn i {
+            font-size: 1.5rem;
+        }
+
+        .quick-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .feature-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .feature-list::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .feature-list::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        .feature-item {
+            padding: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-item i {
+            color: var(--secondary-color);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            border-radius: 50px;
+            padding: 10px;
+            box-shadow: var(--shadow);
+            display: none;
+            z-index: 1000;
+        }
+
+        .mobile-menu .btn {
+            padding: 10px 15px;
+        }
+
+        .simple-ui .panel:not(.clock-container):not(.header) {
+            display: none;
+        }
+
+        .simple-ui .main-content {
+            grid-template-columns: 1fr;
+        }
+
+        .simple-ui .clock-container {
+            grid-column: 1;
+        }
+
+        .simple-ui #uiToggle {
+            background: var(--secondary-color);
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .mobile-menu {
+                display: flex;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .quick-access {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            z-index: 999;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="app-title">
+                <i class="fas fa-clock"></i> Gelişmiş Saat Uygulaması
+            </div>
+            <div class="controls">
+                <button class="btn theme-btn" id="themeBtn">
+                    <i class="fas fa-moon"></i> Tema
+                </button>
+                <button class="btn ui-toggle-btn" id="uiToggle">
+                    <i class="fas fa-exchange-alt"></i> Arayüz
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="panel widget">
+                    <div class="widget-title">
+                        <i class="fas fa-bolt"></i> Hızlı Erişim
+                    </div>
+                    <div class="quick-access">
+                        <div class="quick-btn">
+                            <i class="fas fa-stopwatch"></i>
+                            <span>Kronometre</span>
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fas fa-hourglass-half"></i>
+                            <span>Zamanlayıcı</span>
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fas fa-calendar"></i>
+                            <span>Takvim</span>
+                        </div>
+                        <div class="quick-btn">
+                            <i class="fas fa-bell"></i>
+                            <span>Hatırlatıcı</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel widget">
+                    <div class="widget-title">
+                        <i class="fas fa-star"></i> Öne Çıkan Özellikler
+                    </div>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Analog & Dijital Saat
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Dünya Saatleri
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Tam Ekran Modu
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Pomodoro Zamanlayıcı
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Özelleştirilebilir Tema
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Hava Durumu
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Motivasyon Sözleri
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Not Alma
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check"></i> Doğum Günü Hatırlatıcı
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel clock-container">
+                <div class="date-display" id="dateDisplay">1 Ocak 2023, Pazar</div>
+                <canvas id="clockCanvas" width="350" height="350"></canvas>
+                <div class="digital-clock" id="digitalClock">00:00:00</div>
+                
+                <div class="controls">
+                    <button class="btn" id="soundBtn">
+                        <i class="fas fa-volume-up"></i> Ses
+                    </button>
+                    <button class="btn" id="resetBtn">
+                        <i class="fas fa-undo"></i> Sıfırla
+                    </button>
+                    <button class="btn" id="fullscreenBtn">
+                        <i class="fas fa-expand"></i> Tam Ekran
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-menu">
+        <button class="btn" id="mobileThemeBtn">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button class="btn" id="mobileSoundBtn">
+            <i class="fas fa-volume-up"></i>
+        </button>
+        <button class="btn" id="mobileFullscreenBtn">
+            <i class="fas fa-expand"></i>
+        </button>
+    </div>
+
+    <div class="floating-btn" id="settingsBtn">
+        <i class="fas fa-cog"></i>
+    </div>
+
+    <script>
+        // DOM Elementleri
+        const clockCanvas = document.getElementById('clockCanvas');
+        const ctx = clockCanvas.getContext('2d');
+        const digitalClock = document.getElementById('digitalClock');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const soundBtn = document.getElementById('soundBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const themeBtn = document.getElementById('themeBtn');
+        const uiToggle = document.getElementById('uiToggle');
+        const body = document.body;
+
+        // Değişkenler
+        let rotationAngle = 0;
+        let targetAngle = 0;
+        let dragging = false;
+        let lastMouseX = 0;
+        let soundEnabled = true;
+        let isDarkMode = false;
+        let isSimpleUI = false;
+
+        // Saat çizimi
+        function drawClock() {
+            const width = clockCanvas.width;
+            const height = clockCanvas.height;
+            const center = {x: width/2, y: height/2};
+            const radius = Math.min(width, height) / 2 - 20;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Saat dairesi
+            ctx.strokeStyle = isDarkMode ? '#ecf0f1' : '#2c3e50';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, radius, 0, Math.PI*2);
+            ctx.stroke();
+            
+            // Saat işaretleri
+            for(let i = 1; i <= 12; i++) {
+                const angle = ((i % 12) * 30 - 90) * Math.PI/180 + rotationAngle;
+                const x = center.x + (radius - 30) * Math.cos(angle);
+                const y = center.y + (radius - 30) * Math.sin(angle);
+                
+                ctx.fillStyle = isDarkMode ? '#ecf0f1' : '#2c3e50';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i, x, y);
+            }
+            
+            const now = new Date();
+            const hour = now.getHours() % 12 + now.getMinutes() / 60;
+            const minute = now.getMinutes();
+            const second = now.getSeconds();
+            
+            // Saat kolu
+            let ha = ((hour * 30 - 90) * Math.PI/180) + rotationAngle;
+            ctx.strokeStyle = isDarkMode ? '#3498db' : '#2980b9';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y);
+            ctx.lineTo(center.x + (radius - 60) * Math.cos(ha), center.y + (radius - 60) * Math.sin(ha));
+            ctx.stroke();
+            
+            // Dakika kolu
+            let ma = ((minute * 6 - 90) * Math.PI/180) + rotationAngle;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y);
+            ctx.lineTo(center.x + (radius - 30) * Math.cos(ma), center.y + (radius - 30) * Math.sin(ma));
+            ctx.stroke();
+            
+            // Saniye kolu
+            let sa = ((second * 6 - 90) * Math.PI/180) + rotationAngle;
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y);
+            ctx.lineTo(center.x + (radius - 20) * Math.cos(sa), center.y + (radius - 20) * Math.sin(sa));
+            ctx.stroke();
+            
+            // Merkez noktası
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 8, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // Dijital saati güncelle
+        function updateDigitalClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            digitalClock.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Tarihi güncelle
+        function updateDateDisplay() {
+            const now = new Date();
+            const day = now.getDate();
+            const month = now.toLocaleString('tr-TR', { month: 'long' });
+            const year = now.getFullYear();
+            const weekday = now.toLocaleString('tr-TR', { weekday: 'long' });
+            
+            dateDisplay.textContent = `${day} ${month} ${year}, ${weekday}`;
+        }
+
+        // Event Listeners
+        soundBtn.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundBtn.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i> Ses' : '<i class="fas fa-volume-mute"></i> Ses';
+        });
+
+        resetBtn.addEventListener('click', () => {
+            targetAngle = 0;
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        themeBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            body.classList.toggle('dark-mode', isDarkMode);
+            themeBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i> Tema' : '<i class="fas fa-moon"></i> Tema';
+        });
+
+        uiToggle.addEventListener('click', () => {
+            isSimpleUI = !isSimpleUI;
+            body.classList.toggle('simple-ui', isSimpleUI);
+            uiToggle.innerHTML = isSimpleUI ? '<i class="fas fa-th"></i> Arayüz' : '<i class="fas fa-exchange-alt"></i> Arayüz';
+        });
+
+        // Saati döndürme (stres çarkı efekti)
+        clockCanvas.addEventListener('mousedown', (e) => {
+            dragging = true;
+            lastMouseX = e.clientX;
+            clockCanvas.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mouseup', () => {
+            dragging = false;
+            clockCanvas.style.cursor = 'grab';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (dragging) {
+                const dx = e.clientX - lastMouseX;
+                targetAngle += dx * 0.01;
+                lastMouseX = e.clientX;
+            }
+        });
+
+        // Animasyon döngüsü
+        function animate() {
+            rotationAngle += (targetAngle - rotationAngle) * 0.1;
+            drawClock();
+            updateDigitalClock();
+            updateDateDisplay();
+            requestAnimationFrame(animate);
+        }
+
+        // Yükleme
+        window.addEventListener('load', () => {
+            // Animasyonu başlat
+            animate();
+            
+            // Dijital saati güncelle
+            setInterval(updateDigitalClock, 1000);
+        });
+    </script>
+</body>
+</html>

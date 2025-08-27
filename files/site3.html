@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Saat Uygulaması</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --accent-color: #e74c3c;
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary-color: #34495e;
+            --secondary-color: #2980b9;
+            --text-color: #ecf0f1;
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            --accent-color: #c0392b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            grid-column: 2;
+        }
+
+        #clockCanvas {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            margin: 20px 0;
+            cursor: grab;
+            transition: transform 0.3s ease;
+        }
+
+        #clockCanvas:active {
+            cursor: grabbing;
+        }
+
+        .digital-clock {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+            color: var(--text-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .date-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        .fullscreen-btn {
+            background: var(--secondary-color);
+        }
+
+        .theme-btn {
+            background: var(--accent-color);
+        }
+
+        .profile-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--secondary-color);
+        }
+
+        .profile-info h2 {
+            margin-bottom: 5px;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input, textarea, select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
+        .calendar-panel h2, .notes-panel h2 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .calendar-header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: bold;
+            padding: 5px;
+        }
+
+        .calendar-day {
+            padding: 8px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .calendar-day.has-note::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-color);
+        }
+
+        .calendar-day:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .current-day {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .notes-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .note-date {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .delete-note {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-color);
+        }
+
+        .fullscreen-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .clock-mode-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary-color);
+            color: white;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: var(--secondary-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .settings-panel {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .bg-preview {
+            width: 100%;
+            height: 100px;
+            border-radius: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .bg-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .bg-option {
+            margin-bottom: 15px;
+        }
+
+        .birthday-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-color);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: none;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+
+        .weather-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .weather-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .quote-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .quote-text {
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .quote-author {
+            font-weight: bold;
+        }
+
+        .world-clock-panel {
+            margin-top: 20px;
+        }
+
+        .world-clock {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .pomodoro-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .pomodoro-timer {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .pomodoro-btns {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--secondary-color);
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        .reminder-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .reminder-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reminder-time {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .timer-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .timer-input {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .timer-input input {
+            width: 60px;
+            text-align: center;
+        }
+
+        .stopwatch-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .stopwatch-display {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .stopwatch-laps {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .lap-item {
+            padding: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sound-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .sound-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .volume-slider {
+            width: 100px;
+        }
+
+        @media (max-width: 1100px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .clock-container {
+                grid-column: 1 / -1;
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Tam ekran stilleri */
+        .fullscreen-clock {
+            font-size: 10rem;
+            font-weight: bold;
+            text-align: center;
+            color: var(--text-color);
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .fullscreen-date {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .fullscreen-weather {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .fullscreen-quote {
+            font-size: 1.2rem;
+            max-width: 80%;
+            margin: 0 auto;
+            font-style: italic;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sol Panel - Profil ve Hava Durumu -->
+        <div class="panel profile-panel">
+            <div class="profile-header">
+                <img src="https://via.placeholder.com/80" alt="Profil" class="profile-img" id="profileImage">
+                <div class="profile-info">
+                    <h2 id="profileName">Kullanıcı Adı</h2>
+                    <p id="profileAge">Yaş: 0</p>
+                </div>
+            </div>
+            <div class="profile-form">
+                <div class="form-group">
+                    <label for="userName">Ad Soyad</label>
+                    <input type="text" id="userName" placeholder="Adınız Soyadınız">
+                </div>
+                <div class="form-group">
+                    <label for="userBirthday">Doğum Tarihi</label>
+                    <input type="date" id="userBirthday">
+                </div>
+                <div class="form-group">
+                    <label for="userCity">Şehir</label>
+                    <input type="text" id="userCity" placeholder="Yaşadığınız şehir">
+                </div>
+                <div class="form-group">
+                    <label for="profilePhoto">Profil Fotoğrafı</label>
+                    <input type="file" id="profilePhoto" accept="image/*">
+                </div>
+                <button class="btn" id="saveProfile"><i class="fas fa-save"></i> Profili Kaydet</button>
+            </div>
+
+            <!-- Hava Durumu Bölümü -->
+            <div class="weather-panel">
+                <div class="weather-icon">
+                    <i class="fas fa-sun" id="weatherIcon"></i>
+                </div>
+                <div id="weatherTemp">25°C</div>
+                <div id="weatherDesc">Güneşli</div>
+                <div id="weatherLocation">İstanbul</div>
+                <div id="weatherError" class="hidden">İnternet bağlantısı yok</div>
+            </div>
+
+            <!-- Motivasyon Sözü -->
+            <div class="quote-container">
+                <div class="quote-text" id="dailyQuote">"Hayattaki en büyük zafer hiçbir zaman düşmemekte değil, her düştüğünüzde ayağa kalkmakta yatar."</div>
+                <div class="quote-author" id="quoteAuthor">- Nelson Mandela</div>
+                <button class="btn" id="newQuoteBtn" style="margin-top: 10px;"><i class="fas fa-sync"></i> Yeni Söz</button>
+            </div>
+        </div>
+
+        <!-- Orta Panel - Saat ve Kontroller -->
+        <div class="clock-container panel">
+            <div class="date-display" id="dateDisplay">1 Ocak 2023, Pazar</div>
+            <canvas id="clockCanvas" width="400" height="400"></canvas>
+            <div class="digital-clock" id="digitalClock">00:00:00</div>
+            
+            <div class="clock-mode-selector">
+                <button class="mode-btn active" data-mode="analog">Analog</button>
+                <button class="mode-btn" data-mode="digital">Dijital</button>
+                <button class="mode-btn" data-mode="both">Her İkisi</button>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="soundBtn"><i class="fas fa-volume-up"></i> Ses</button>
+                <button class="btn" id="resetBtn"><i class="fas fa-undo"></i> Sıfırla</button>
+                <button class="btn fullscreen-btn" id="fullscreenBtn"><i class="fas fa-expand"></i> Tam Ekran</button>
+                <button class="btn theme-btn" id="themeBtn"><i class="fas fa-moon"></i> Koyu Mod</button>
+            </div>
+
+            <!-- Ses Kontrolleri -->
+            <div class="sound-controls">
+                <div class="sound-control">
+                    <span>Tik Tak Sesi:</span>
+                    <input type="range" class="volume-slider" id="tickVolume" min="0" max="100" value="50">
+                </div>
+                <div class="sound-control">
+                    <span>Saat Sesi:</span>
+                    <input type="range" class="volume-slider" id="chimeVolume" min="0" max="100" value="50">
+                </div>
+                <div class="sound-control">
+                    <span>Bildirim Sesi:</span>
+                    <input type="range" class="volume-slider" id="notificationVolume" min="0" max="100" value="50">
+                </div>
+            </div>
+
+            <!-- Pomodoro Zamanlayıcı -->
+            <div class="pomodoro-container">
+                <h3>Pomodoro Zamanlayıcı</h3>
+                <div class="pomodoro-timer" id="pomodoroTimer">25:00</div>
+                <div class="pomodoro-btns">
+                    <button class="btn" id="pomodoroStart"><i class="fas fa-play"></i> Başlat</button>
+                    <button class="btn" id="pomodoroPause"><i class="fas fa-pause"></i> Duraklat</button>
+                    <button class="btn" id="pomodoroReset"><i class="fas fa-redo"></i> Sıfırla</button>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress" id="pomodoroProgress"></div>
+                </div>
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Çalışma Süresi (dk):</label>
+                    <input type="number" id="workDuration" min="1" max="60" value="25">
+                </div>
+                <div class="form-group">
+                    <label>Mola Süresi (dk):</label>
+                    <input type="number" id="breakDuration" min="1" max="30" value="5">
+                </div>
+            </div>
+
+            <!-- Kronometre -->
+            <div class="stopwatch-container">
+                <h3>Kronometre</h3>
+                <div class="stopwatch-display" id="stopwatchDisplay">00:00:00</div>
+                <div class="controls">
+                    <button class="btn" id="stopwatchStart"><i class="fas fa-play"></i> Başlat</button>
+                    <button class="btn" id="stopwatchPause"><i class="fas fa-pause"></i> Duraklat</button>
+                    <button class="btn" id="stopwatchReset"><i class="fas fa-redo"></i> Sıfırla</button>
+                    <button class="btn" id="stopwatchLap"><i class="fas fa-flag"></i> Tur</button>
+                </div>
+                <div class="stopwatch-laps" id="stopwatchLaps"></div>
+            </div>
+
+            <!-- Geri Sayım -->
+            <div class="timer-container">
+                <h3>Geri Sayım</h3>
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="timer-input">
+                    <div class="form-group">
+                        <label>Saat</label>
+                        <input type="number" id="timerHours" min="0" max="23" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Dakika</label>
+                        <input type="number" id="timerMinutes" min="0" max="59" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Saniye</label>
+                        <input type="number" id="timerSeconds" min="0" max="59" value="0">
+                    </div>
+                </div>
+                <div class="controls">
+                    <button class="btn" id="timerStart"><i class="fas fa-play"></i> Başlat</button>
+                    <button class="btn" id="timerPause"><i class="fas fa-pause"></i> Duraklat</button>
+                    <button class="btn" id="timerReset"><i class="fas fa-redo"></i> Sıfırla</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Panel - Takvim, Notlar ve Hatırlatıcılar -->
+        <div class="panel calendar-panel">
+            <h2>Takvim</h2>
+            <div class="calendar-header">
+                <button class="btn" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                <h3 id="currentMonth">Ocak 2023</h3>
+                <button class="btn" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar" id="calendar"></div>
+            
+            <h2>Notlar</h2>
+            <div id="selectedDate">Seçili Tarih: -</div>
+            <div class="form-group">
+                <textarea id="noteText" placeholder="Bu tarih için not ekleyin..." rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="noteImage">Fotoğraf Ekle</label>
+                <input type="file" id="noteImage" accept="image/*">
+            </div>
+            <button class="btn" id="saveNote"><i class="fas fa-save"></i> Notu Kaydet</button>
+            
+            <h3 style="margin-top: 20px;">Kayıtlı Notlar</h3>
+            <div class="notes-list" id="notesList"></div>
+
+            <!-- Dünya Saatleri -->
+            <div class="world-clock-panel">
+                <h3>Dünya Saatleri</h3>
+                <div id="worldClocks">
+                    <div class="world-clock">
+                        <span>New York</span>
+                        <span id="newYorkTime">00:00:00</span>
+                    </div>
+                    <div class="world-clock">
+                        <span>Londra</span>
+                        <span id="londonTime">00:00:00</span>
+                    </div>
+                    <div class="world-clock">
+                        <span>Tokyo</span>
+                        <span id="tokyoTime">00:00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hatırlatıcılar -->
+            <div class="reminders">
+                <h3>Hatırlatıcılar</h3>
+                <div class="form-group">
+                    <input type="text" id="reminderText" placeholder="Hatırlatıcı metni">
+                    <input type="time" id="reminderTime">
+                    <button class="btn" id="addReminderBtn"><i class="fas fa-plus"></i> Ekle</button>
+                </div>
+                <div class="reminder-list" id="reminderList"></div>
+            </div>
+        </div>
+
+        <!-- Ayarlar Paneli -->
+        <div class="panel settings-panel">
+            <h2>Ayarlar</h2>
+            <div class="settings-grid">
+                <div class="bg-option">
+                    <h3>Arka Plan Efekti</h3>
+                    <select id="bgEffect">
+                        <option value="gradient">Renk Geçişi</option>
+                        <option value="solid">Düz Renk</option>
+                        <option value="rgb">RGB Işık</option>
+                    </select>
+                    
+                    <div id="colorPicker" class="form-group">
+                        <label for="solidColor">Arka Plan Rengi</label>
+                        <input type="color" id="solidColor" value="#1a1a2e">
+                    </div>
+                </div>
+                
+                <div class="bg-option">
+                    <h3>Renk Geçişi Seçenekleri</h3>
+                    <div class="bg-preview" id="gradient1" style="background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);"></div>
+                    <div class="bg-preview" id="gradient2" style="background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);"></div>
+                    <div class="bg-preview" id="gradient3" style="background: linear-gradient(-45deg, #4facfe, #00f2fe, #a1c4fd, #c2e9fb);"></div>
+                </div>
+
+                <div class="bg-option">
+                    <h3>Saat Ayarları</h3>
+                    <div class="form-group">
+                        <label for="hourFormat">Saat Formatı</label>
+                        <select id="hourFormat">
+                            <option value="24">24 Saat</option>
+                            <option value="12">12 Saat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="secondHand">Saniye Göstergesi</label>
+                        <select id="secondHand">
+                            <option value="show">Göster</option>
+                            <option value="hide">Gizle</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-option">
+                    <h3>Tam Ekran Ayarları</h3>
+                    <div class="form-group">
+                        <label for="fullscreenBg">Tam Ekran Arka Planı</label>
+                        <input type="color" id="fullscreenBg" value="#000000">
+                    </div>
+                    <div class="form-group">
+                        <label for="fullscreenColor">Tam Ekran Yazı Rengi</label>
+                        <input type="color" id="fullscreenColor" value="#ffffff">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="showWeatherFullscreen"> Hava Durumu Göster
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="showQuoteFullscreen"> Motivasyon Sözü Göster
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tam Ekran Modu -->
+    <div class="fullscreen-mode hidden" id="fullscreenMode">
+        <div class="fullscreen-controls">
+            <button class="btn" id="exitFullscreenBtn"><i class="fas fa-compress"></i> Çıkış</button>
+        </div>
+        
+        <div class="fullscreen-date" id="fullscreenDateDisplay">1 Ocak 2023, Pazar</div>
+        <div class="fullscreen-clock" id="fullscreenClockDisplay">00:00:00</div>
+        
+        <div class="fullscreen-weather hidden" id="fullscreenWeather">
+            <i class="fas fa-sun"></i> 25°C - Güneşli
+        </div>
+        
+        <div class="fullscreen-quote hidden" id="fullscreenQuote">
+            "Hayattaki en büyük zafer hiçbir zaman düşmemekte değil, her düştüğünüzde ayağa kalkmakta yatar." - Nelson Mandela
+        </div>
+    </div>
+
+    <!-- Doğum Günü Bildirimi -->
+    <div class="birthday-notification" id="birthdayNotification">
+        <i class="fas fa-birthday-cake"></i> Doğum gününüz kutlu olsun!
+    </div>
+
+    <script>
+        // DOM Elementleri
+        const clockCanvas = document.getElementById('clockCanvas');
+        const ctx = clockCanvas.getContext('2d');
+        const digitalClock = document.getElementById('digitalClock');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const soundBtn = document.getElementById('soundBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+        const themeBtn = document.getElementById('themeBtn');
+        const fullscreenMode = document.getElementById('fullscreenMode');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const calendar = document.getElementById('calendar');
+        const currentMonthEl = document.getElementById('currentMonth');
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
+        const noteText = document.getElementById('noteText');
+        const saveNoteBtn = document.getElementById('saveNote');
+        const notesList = document.getElementById('notesList');
+        const selectedDateEl = document.getElementById('selectedDate');
+        const profileImage = document.getElementById('profileImage');
+        const profileName = document.getElementById('profileName');
+        const profileAge = document.getElementById('profileAge');
+        const userName = document.getElementById('userName');
+        const userBirthday = document.getElementById('userBirthday');
+        const userCity = document.getElementById('userCity');
+        const profilePhoto = document.getElementById('profilePhoto');
+        const saveProfileBtn = document.getElementById('saveProfile');
+        const bgEffect = document.getElementById('bgEffect');
+        const solidColor = document.getElementById('solidColor');
+        const gradientPreviews = document.querySelectorAll('.bg-preview');
+        const birthdayNotification = document.getElementById('birthdayNotification');
+        const pomodoroTimer = document.getElementById('pomodoroTimer');
+        const pomodoroStart = document.getElementById('pomodoroStart');
+        const pomodoroPause = document.getElementById('pomodoroPause');
+        const pomodoroReset = document.getElementById('pomodoroReset');
+        const pomodoroProgress = document.getElementById('pomodoroProgress');
+        const workDuration = document.getElementById('workDuration');
+        const breakDuration = document.getElementById('breakDuration');
+        const newQuoteBtn = document.getElementById('newQuoteBtn');
+        const dailyQuote = document.getElementById('dailyQuote');
+        const quoteAuthor = document.getElementById('quoteAuthor');
+        const newYorkTime = document.getElementById('newYorkTime');
+        const londonTime = document.getElementById('londonTime');
+        const tokyoTime = document.getElementById('tokyoTime');
+        const reminderText = document.getElementById('reminderText');
+        const reminderTime = document.getElementById('reminderTime');
+        const addReminderBtn = document.getElementById('addReminderBtn');
+        const reminderList = document.getElementById('reminderList');
+        const hourFormat = document.getElementById('hourFormat');
+        const secondHand = document.getElementById('secondHand');
+        const weatherIcon = document.getElementById('weatherIcon');
+        const weatherTemp = document.getElementById('weatherTemp');
+        const weatherDesc = document.getElementById('weatherDesc');
+        const weatherLocation = document.getElementById('weatherLocation');
+        const weatherError = document.getElementById('weatherError');
+        const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+        const stopwatchStart = document.getElementById('stopwatchStart');
+        const stopwatchPause = document.getElementById('stopwatchPause');
+        const stopwatchReset = document.getElementById('stopwatchReset');
+        const stopwatchLap = document.getElementById('stopwatchLap');
+        const stopwatchLaps = document.getElementById('stopwatchLaps');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerHours = document.getElementById('timerHours');
+        const timerMinutes = document.getElementById('timerMinutes');
+        const timerSeconds = document.getElementById('timerSeconds');
+        const timerStart = document.getElementById('timerStart');
+        const timerPause = document.getElementById('timerPause');
+        const timerReset = document.getElementById('timerReset');
+        const tickVolume = document.getElementById('tickVolume');
+        const chimeVolume = document.getElementById('chimeVolume');
+        const notificationVolume = document.getElementById('notificationVolume');
+        const fullscreenClockDisplay = document.getElementById('fullscreenClockDisplay');
+        const fullscreenDateDisplay = document.getElementById('fullscreenDateDisplay');
+        const fullscreenWeather = document.getElementById('fullscreenWeather');
+        const fullscreenQuote = document.getElementById('fullscreenQuote');
+        const fullscreenBg = document.getElementById('fullscreenBg');
+        const fullscreenColor = document.getElementById('fullscreenColor');
+        const showWeatherFullscreen = document.getElementById('showWeatherFullscreen');
+        const showQuoteFullscreen = document.getElementById('showQuoteFullscreen');
+
+        // Değişkenler
+        let rotationAngle = 0;
+        let targetAngle = 0;
+        let dragging = false;
+        let lastMouseX = 0;
+        let soundEnabled = true;
+        let isDarkMode = false;
+        let currentDate = new Date();
+        let selectedDate = null;
+        let currentClockMode = 'analog';
+        let birthdayChecked = false;
+        let pomodoroInterval;
+        let pomodoroMinutes = 25;
+        let pomodoroSeconds = 0;
+        let pomodoroRunning = false;
+        let pomodoroMode = 'work'; // 'work' or 'break'
+        let reminders = [];
+        let stopwatchInterval;
+        let stopwatchTime = 0;
+        let stopwatchRunning = false;
+        let stopwatchLapsArray = [];
+        let timerInterval;
+        let timerTime = 0;
+        let timerRunning = false;
+        let lastSecond = -1;
+        let lastHour = -1;
+        let audioContext;
+        let tickSound;
+        let chimeSound;
+        let onlineStatus = true;
+
+        // Motivasyon sözleri (365 adet)
+        const quotes = [
+            { text: "Hayattaki en büyük zafer hiçbir zaman düşmemekte değil, her düştüğünüzde ayağa kalkmakta yatar.", author: "Nelson Mandela" },
+            { text: "Gelecek, onu hazırlayanlarındır.", author: "Malcolm X" },
+            { text: "Yapabileceğinize inandığınız ya da yapamayacağınıza inandığınız her şeyde haklısınız.", author: "Henry Ford" },
+            { text: "Hayat ya cesur bir maceradır ya da hiçbir şey.", author: "Helen Keller" },
+            { text: "En iyi intikam muazzam bir başarıdır.", author: "Frank Sinatra" },
+            { text: "Başarı, başarısızlıklar arasında yolunu kaybetmemektir.", author: "Winston Churchill" },
+            { text: "Fırtınalar en güçlü ağaçları test eder.", author: "Walter Raleigh" },
+            { text: "Zorluklar, sıradan insanları sıra dışı başarılara hazırlar.", author: "C.S. Lewis" },
+            { text: "Hayal etmek, gerçekleştirmenin ilk adımıdır.", author: "Joe Girard" },
+            { text: "Değişim, hayatın kuralıdır. Geçmişe veya şimdiye takılıp kalanlar, geleceği kaçırırlar.", author: "John F. Kennedy" },
+            // Daha fazla söz eklenebilir (toplam 365 olacak şekilde)
+            // Burada 10 tane gösterdim, gerçek uygulamada 365 tane olmalı
+        ];
+
+        // Saat verileri
+        const weekdays = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+        const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        // Program verileri
+        let program = [
+            {start:"05:30", end:"05:40", activity:"Esneme / hareket"},
+            {start:"05:40", end:"06:10", activity:"Kahvaltı"},
+            {start:"06:10", end:"06:30", activity:"Ders notlarına bak"},
+        ];
+
+        let userProfile = {
+            name: '',
+            birthday: null,
+            photo: null,
+            city: ''
+        };
+
+        let notes = {};
+
+        // Sesleri başlat
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Tik tak sesi
+                tickSound = audioContext.createOscillator();
+                tickSound.type = "sine";
+                tickSound.frequency.setValueAtTime(1000, audioContext.currentTime);
+                tickSound.start();
+                tickSound.stop();
+                
+                // Saat başı sesi
+                chimeSound = audioContext.createOscillator();
+                chimeSound.type = "sine";
+                chimeSound.frequency.setValueAtTime(800, audioContext.currentTime);
+                chimeSound.start();
+                chimeSound.stop();
+            } catch (e) {
+                console.error("Ses başlatılamadı:", e);
+                soundEnabled = false;
+                soundBtn.innerHTML = '<i class="fas fa-volume-mute"></i> Ses Yok';
+            }
+        }
+
+        // Tik tak sesi çal
+        function playTick() {
+            if (!soundEnabled) return;
+            
+            try {
+                const volume = tickVolume.value / 100;
+                const source = audioContext.createOscillator();
+                source.type = "sine";
+                source.frequency.setValueAtTime(1000, audioContext.currentTime);
+                
+                const gainNode = audioContext.createGain();
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                source.start();
+                source.stop(audioContext.currentTime + 0.05);
+            } catch (e) {
+                console.error("Ses çalınamadı:", e);
+            }
+        }
+
+        // Saat başı sesi çal
+        function playChime() {
+            if (!soundEnabled) return;
+            
+            try {
+                const volume = chimeVolume.value / 100;
+                const source = audioContext.createOscillator();
+                source.type = "sine";
+                source.frequency.setValueAtTime(800, audioContext.currentTime);
+                
+                const gainNode = audioContext.createGain();
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                source.start();
+                source.stop(audioContext.currentTime + 0.5);
+            } catch (e) {
+                console.error("Ses çalınamadı:", e);
+            }
+        }
+
+        // Bildirim sesi çal
+        function playNotification() {
+            if (!soundEnabled) return;
+            
+            try {
+                const volume = notificationVolume.value / 100;
+                const source = audioContext.createOscillator();
+                source.type = "sine";
+                source.frequency.setValueAtTime(600, audioContext.currentTime);
+                
+                const gainNode = audioContext.createGain();
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                source.start();
+                source.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.error("Ses çalınamadı:", e);
+            }
+        }
+
+        // Saat çizimi
+        function drawClock(ctx, width, height, rotation) {
+            const center = {x: width/2, y: height/2};
+            const radius = Math.min(width, height) / 2 - 20;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Saat dairesi
+            ctx.strokeStyle = isDarkMode ? '#ecf0f1' : '#2c3e50';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, radius, 0, Math.PI*2);
+            ctx.stroke();
+            
+            // Saat işaretleri
+            for(let i = 1; i <= 12; i++) {
+                const angle = ((i % 12) * 30 - 90) * Math.PI/180 + rotation;
+                const x = center.x + (radius - 30) * Math.cos(angle);
+                const y = center.y + (radius - 30) * Math.sin(angle);
+                
+                ctx.fillStyle = isDarkMode ? '#ecf0f1' : '#2c3e50';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i, x, y);
+            }
+            
+            const now = new Date();
+            const hour = now.getHours() % 12 + now.getMinutes() / 60;
+            const minute = now.getMinutes();
+            const second = now.getSeconds();
+            
+            // Saat kolu
+            let ha = ((hour * 30 - 90) * Math.PI/180) + rotation;
+            ctx.strokeStyle = isDarkMode ? '#3498db' : '#2980b9';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y);
+            ctx.lineTo(center.x + (radius - 60) * Math.cos(ha), center.y + (radius - 60) * Math.sin(ha));
+            ctx.stroke();
+            
+            // Dakika kolu
+            let ma = ((minute * 6 - 90) * Math.PI/180) + rotation;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y);
+            ctx.lineTo(center.x + (radius - 30) * Math.cos(ma), center.y + (radius - 30) * Math.sin(ma));
+            ctx.stroke();
+            
+            // Saniye kolu (isteğe bağlı)
+            if (secondHand.value === 'show') {
+                let sa = ((second * 6 - 90) * Math.PI/180) + rotation;
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(center.x, center.y);
+                ctx.lineTo(center.x + (radius - 20) * Math.cos(sa), center.y + (radius - 20) * Math.sin(sa));
+                ctx.stroke();
+            }
+            
+            // Merkez noktası
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 8, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // Dijital saati güncelle
+        function updateDigitalClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // Tik tak sesi
+            if (soundEnabled && seconds !== lastSecond) {
+                playTick();
+                lastSecond = seconds;
+            }
+            
+            // Saat başı sesi
+            if (soundEnabled && hours !== lastHour && minutes === '00' && seconds === '00') {
+                playChime();
+                lastHour = hours;
+            }
+            
+            // 12/24 saat formatı
+            if (hourFormat.value === '12') {
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12; // 0 should be 12
+                digitalClock.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+                fullscreenClockDisplay.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+            } else {
+                digitalClock.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds}`;
+                fullscreenClockDisplay.textContent = `${String(hours).padStart(2, '0')}:${minutes}:${seconds}`;
+            }
+        }
+
+        // Tarihi güncelle
+        function updateDateDisplay() {
+            const now = new Date();
+            const day = now.getDate();
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            const weekday = weekdays[now.getDay()];
+            
+            dateDisplay.textContent = `${day} ${month} ${year}, ${weekday}`;
+            fullscreenDateDisplay.textContent = `${day} ${month} ${year}, ${weekday}`;
+        }
+
+        // Dünya saatlerini güncelle
+        function updateWorldClocks() {
+            const now = new Date();
+            
+            // New York (UTC-4/-5)
+            const nyOffset = now.getTimezoneOffset() / 60 + (now.getTimezoneOffset() < 0 ? 4 : -4);
+            const nyTime = new Date(now.getTime() + nyOffset * 60 * 60 * 1000);
+            newYorkTime.textContent = formatTime(nyTime);
+            
+            // Londra (UTC+0/+1)
+            const londonOffset = now.getTimezoneOffset() / 60 + (now.getTimezoneOffset() < 0 ? -1 : 1);
+            const londonTime = new Date(now.getTime() + londonOffset * 60 * 60 * 1000);
+            londonTime.textContent = formatTime(londonTime);
+            
+            // Tokyo (UTC+9)
+            const tokyoOffset = now.getTimezoneOffset() / 60 + (now.getTimezoneOffset() < 0 ? -9 : 9);
+            const tokyoTime = new Date(now.getTime() + tokyoOffset * 60 * 60 * 1000);
+            tokyoTime.textContent = formatTime(tokyoTime);
+        }
+
+        // Saat formatı
+        function formatTime(date) {
+            let hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            if (hourFormat.value === '12') {
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                return `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+            } else {
+                return `${String(hours).padStart(2, '0')}:${minutes}:${seconds}`;
+            }
+        }
+
+        // Takvim oluştur
+        function renderCalendar() {
+            calendar.innerHTML = '';
+            
+            // Haftanın günleri
+            for (let i = 0; i < 7; i++) {
+                const weekdayEl = document.createElement('div');
+                weekdayEl.className = 'weekday';
+                weekdayEl.textContent = weekdays[i];
+                calendar.appendChild(weekdayEl);
+            }
+            
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+            const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+            
+            // Boş hücreler
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendar.appendChild(emptyDay);
+            }
+            
+            // Günler
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                dayEl.textContent = i;
+                
+                // Bugünü işaretle
+                if (i === today.getDate() && 
+                    currentDate.getMonth() === today.getMonth() && 
+                    currentDate.getFullYear() === today.getFullYear()) {
+                    dayEl.classList.add('current-day');
+                }
+                
+                // Not var mı kontrol et
+                const dateStr = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${i}`;
+                if (notes[dateStr]) {
+                    dayEl.classList.add('has-note');
+                }
+                
+                dayEl.addEventListener('click', () => {
+                    selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+                    selectedDateEl.textContent = `Seçili Tarih: ${i} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+                    
+                    // Notu yükle
+                    if (notes[dateStr]) {
+                        noteText.value = notes[dateStr].text || '';
+                    } else {
+                        noteText.value = '';
+                    }
+                });
+                
+                calendar.appendChild(dayEl);
+            }
+            
+            currentMonthEl.textContent = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        }
+
+        // Notları kaydet
+        function saveNote() {
+            if (!selectedDate) {
+                alert('Lütfen bir tarih seçin.');
+                return;
+            }
+            
+            const dateStr = `${selectedDate.getFullYear()}-${selectedDate.getMonth() + 1}-${selectedDate.getDate()}`;
+            
+            if (!notes[dateStr]) {
+                notes[dateStr] = {};
+            }
+            
+            notes[dateStr].text = noteText.value;
+            
+            // Dosya yükleme
+            const imageFile = document.getElementById('noteImage').files[0];
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    notes[dateStr].image = e.target.result;
+                    updateNotesList();
+                    renderCalendar();
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                updateNotesList();
+                renderCalendar();
+            }
+            
+            // LocalStorage'a kaydet
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        // Not listesini güncelle
+        function updateNotesList() {
+            notesList.innerHTML = '';
+            
+            for (const date in notes) {
+                if (notes[date].text) {
+                    const noteItem = document.createElement('div');
+                    noteItem.className = 'note-item';
+                    
+                    const [year, month, day] = date.split('-');
+                    noteItem.innerHTML = `
+                        <div class="note-date">${day} ${months[parseInt(month)-1]} ${year}</div>
+                        <div class="note-text">${notes[date].text}</div>
+                        <button class="delete-note" data-date="${date}"><i class="fas fa-trash"></i></button>
+                    `;
+                    
+                    if (notes[date].image) {
+                        const img = document.createElement('img');
+                        img.src = notes[date].image;
+                        img.style.maxWidth = '100%';
+                        img.style.marginTop = '10px';
+                        img.style.borderRadius = '8px';
+                        noteItem.appendChild(img);
+                    }
+                    
+                    notesList.appendChild(noteItem);
+                }
+            }
+            
+            // Silme butonlarına event listener ekle
+            document.querySelectorAll('.delete-note').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const date = e.currentTarget.dataset.date;
+                    delete notes[date];
+                    updateNotesList();
+                    renderCalendar();
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                });
+            });
+        }
+
+        // Rastgele motivasyon sözü seç
+        function getRandomQuote() {
+            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+            const quoteIndex = dayOfYear % quotes.length;
+            dailyQuote.textContent = `"${quotes[quoteIndex].text}"`;
+            quoteAuthor.textContent = `- ${quotes[quoteIndex].author}`;
+            fullscreenQuote.textContent = `"${quotes[quoteIndex].text}" - ${quotes[quoteIndex].author}`;
+        }
+
+        // Pomodoro zamanlayıcıyı başlat
+        function startPomodoro() {
+            if (pomodoroRunning) return;
+            
+            pomodoroRunning = true;
+            pomodoroMinutes = parseInt(workDuration.value);
+            pomodoroSeconds = 0;
+            
+            if (pomodoroMode === 'break') {
+                pomodoroMinutes = parseInt(breakDuration.value);
+            }
+            
+            const totalSeconds = pomodoroMinutes * 60 + pomodoroSeconds;
+            let secondsLeft = totalSeconds;
+            
+            pomodoroInterval = setInterval(() => {
+                secondsLeft--;
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(pomodoroInterval);
+                    pomodoroTimer.textContent = pomodoroMode === 'work' ? "Mola Zamanı!" : "Çalışma Zamanı!";
+                    if (soundEnabled) playNotification();
+                    pomodoroRunning = false;
+                    pomodoroProgress.style.width = '100%';
+                    
+                    // Mod değiştir
+                    pomodoroMode = pomodoroMode === 'work' ? 'break' : 'work';
+                    return;
+                }
+                
+                const minutes = Math.floor(secondsLeft / 60);
+                const seconds = secondsLeft % 60;
+                pomodoroTimer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                // İlerleme çubuğunu güncelle
+                const progress = ((totalSeconds - secondsLeft) / totalSeconds) * 100;
+                pomodoroProgress.style.width = `${progress}%`;
+            }, 1000);
+        }
+
+        // Pomodoro zamanlayıcıyı duraklat
+        function pausePomodoro() {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+        }
+
+        // Pomodoro zamanlayıcıyı sıfırla
+        function resetPomodoro() {
+            clearInterval(pomodoroInterval);
+            pomodoroRunning = false;
+            pomodoroMode = 'work';
+            pomodoroMinutes = parseInt(workDuration.value);
+            pomodoroSeconds = 0;
+            pomodoroTimer.textContent = `${String(pomodoroMinutes).padStart(2, '0')}:00`;
+            pomodoroProgress.style.width = '0%';
+        }
+
+        // Kronometreyi başlat
+        function startStopwatch() {
+            if (stopwatchRunning) return;
+            
+            stopwatchRunning = true;
+            const startTime = Date.now() - stopwatchTime;
+            
+            stopwatchInterval = setInterval(() => {
+                stopwatchTime = Date.now() - startTime;
+                updateStopwatchDisplay();
+            }, 10);
+        }
+
+        // Kronometreyi güncelle
+        function updateStopwatchDisplay() {
+            const hours = Math.floor(stopwatchTime / 3600000);
+            const minutes = Math.floor((stopwatchTime % 3600000) / 60000);
+            const seconds = Math.floor((stopwatchTime % 60000) / 1000);
+            const ms = Math.floor((stopwatchTime % 1000) / 10);
+            
+            stopwatchDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(ms).padStart(2, '0')}`;
+        }
+
+        // Kronometreyi duraklat
+        function pauseStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchRunning = false;
+        }
+
+        // Kronometreyi sıfırla
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchRunning = false;
+            stopwatchTime = 0;
+            stopwatchLapsArray = [];
+            updateStopwatchDisplay();
+            stopwatchLaps.innerHTML = '';
+        }
+
+        // Kronometre turu ekle
+        function lapStopwatch() {
+            if (!stopwatchRunning) return;
+            
+            const lapTime = stopwatchTime;
+            stopwatchLapsArray.push(lapTime);
+            
+            const lapItem = document.createElement('div');
+            lapItem.className = 'lap-item';
+            lapItem.textContent = `Tur ${stopwatchLapsArray.length}: ${formatStopwatchTime(lapTime)}`;
+            stopwatchLaps.appendChild(lapItem);
+            stopwatchLaps.scrollTop = stopwatchLaps.scrollHeight;
+        }
+
+        // Kronometre zamanını formatla
+        function formatStopwatchTime(time) {
+            const hours = Math.floor(time / 3600000);
+            const minutes = Math.floor((time % 3600000) / 60000);
+            const seconds = Math.floor((time % 60000) / 1000);
+            const ms = Math.floor((time % 1000) / 10);
+            
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(ms).padStart(2, '0')}`;
+        }
+
+        // Geri sayımı başlat
+        function startTimer() {
+            if (timerRunning) return;
+            
+            const hours = parseInt(timerHours.value) || 0;
+            const minutes = parseInt(timerMinutes.value) || 0;
+            const seconds = parseInt(timerSeconds.value) || 0;
+            
+            timerTime = hours * 3600 + minutes * 60 + seconds;
+            
+            if (timerTime <= 0) {
+                alert("Lütfen geçerli bir süre girin.");
+                return;
+            }
+            
+            timerRunning = true;
+            
+            timerInterval = setInterval(() => {
+                timerTime--;
+                
+                if (timerTime <= 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = "Süre Doldu!";
+                    if (soundEnabled) playNotification();
+                    timerRunning = false;
+                    return;
+                }
+                
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        // Geri sayımı güncelle
+        function updateTimerDisplay() {
+            const hours = Math.floor(timerTime / 3600);
+            const minutes = Math.floor((timerTime % 3600) / 60);
+            const seconds = timerTime % 60;
+            
+            timerDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            timerHours.value = hours;
+            timerMinutes.value = minutes;
+            timerSeconds.value = seconds;
+        }
+
+        // Geri sayımı duraklat
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+        }
+
+        // Geri sayımı sıfırla
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            timerTime = 0;
+            timerHours.value = 0;
+            timerMinutes.value = 0;
+            timerSeconds.value = 0;
+            timerDisplay.textContent = "00:00:00";
+        }
+
+        // Hatırlatıcı ekle
+        function addReminder() {
+            const text = reminderText.value;
+            const time = reminderTime.value;
+            
+            if (!text || !time) {
+                alert('Lütfen hatırlatıcı metni ve saat girin.');
+                return;
+            }
+            
+            const reminder = {
+                id: Date.now(),
+                text: text,
+                time: time,
+                completed: false
+            };
+            
+            reminders.push(reminder);
+            updateReminderList();
+            saveReminders();
+            
+            // Inputları temizle
+            reminderText.value = '';
+            reminderTime.value = '';
+        }
+
+        // Hatırlatıcı listesini güncelle
+        function updateReminderList() {
+            reminderList.innerHTML = '';
+            
+            reminders.forEach(reminder => {
+                const reminderItem = document.createElement('div');
+                reminderItem.className = 'reminder-item';
+                reminderItem.innerHTML = `
+                    <div>${reminder.text}</div>
+                    <div class="reminder-time">${reminder.time}</div>
+                    <button class="delete-reminder" data-id="${reminder.id}"><i class="fas fa-trash"></i></button>
+                `;
+                
+                reminderList.appendChild(reminderItem);
+            });
+            
+            // Silme butonlarına event listener ekle
+            document.querySelectorAll('.delete-reminder').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = parseInt(e.currentTarget.dataset.id);
+                    reminders = reminders.filter(r => r.id !== id);
+                    updateReminderList();
+                    saveReminders();
+                });
+            });
+        }
+
+        // Hatırlatıcıları kontrol et
+        function checkReminders() {
+            const now = new Date();
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            reminders.forEach(reminder => {
+                if (reminder.time === currentTime && !reminder.completed) {
+                    alert(`Hatırlatıcı: ${reminder.text}`);
+                    reminder.completed = true;
+                    
+                    if (soundEnabled) playNotification();
+                }
+            });
+            
+            saveReminders();
+        }
+
+        // Hatırlatıcıları kaydet
+        function saveReminders() {
+            localStorage.setItem('reminders', JSON.stringify(reminders));
+        }
+
+        // Hava durumu güncelleme
+        function updateWeather() {
+            if (!userProfile.city) {
+                weatherError.classList.remove('hidden');
+                weatherLocation.textContent = "Şehir ayarlanmamış";
+                return;
+            }
+            
+            // İnternet bağlantısını kontrol et
+            if (!navigator.onLine) {
+                weatherError.classList.remove('hidden');
+                weatherLocation.textContent = userProfile.city;
+                onlineStatus = false;
+                return;
+            }
+            
+            onlineStatus = true;
+            weatherError.classList.add('hidden');
+            
+            // OpenWeatherMap API (demo amaçlı simüle edilmiş)
+            const apiKey = 'your_api_key_here'; // Gerçek uygulamada kullanılacak
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${userProfile.city}&appid=${apiKey}&units=metric&lang=tr`;
+            
+            // Gerçek API isteği yerine simüle edilmiş veri
+            setTimeout(() => {
+                const weatherConditions = [
+                    { icon: 'fa-sun', temp: 25, desc: 'Güneşli' },
+                    { icon: 'fa-cloud', temp: 18, desc: 'Bulutlu' },
+                    { icon: 'fa-cloud-rain', temp: 12, desc: 'Yağmurlu' },
+                    { icon: 'fa-bolt', temp: 15, desc: 'Fırtınalı' },
+                    { icon: 'fa-snowflake', temp: -2, desc: 'Karlı' }
+                ];
+                
+                const randomWeather = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+                weatherIcon.className = `fas ${randomWeather.icon}`;
+                weatherTemp.textContent = `${randomWeather.temp}°C`;
+                weatherDesc.textContent = randomWeather.desc;
+                weatherLocation.textContent = userProfile.city;
+                
+                // Tam ekran modu için hava durumu
+                fullscreenWeather.innerHTML = `<i class="fas ${randomWeather.icon}"></i> ${randomWeather.temp}°C - ${randomWeather.desc}`;
+            }, 1000);
+        }
+
+        // Tam ekran moduna geç
+        function enterFullscreen() {
+            fullscreenMode.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Tam ekran arka plan ve metin rengi
+            fullscreenMode.style.backgroundColor = fullscreenBg.value;
+            fullscreenClockDisplay.style.color = fullscreenColor.value;
+            fullscreenDateDisplay.style.color = fullscreenColor.value;
+            fullscreenWeather.style.color = fullscreenColor.value;
+            fullscreenQuote.style.color = fullscreenColor.value;
+            
+            // Hava durumu ve söz gösterimi
+            fullscreenWeather.classList.toggle('hidden', !showWeatherFullscreen.checked);
+            fullscreenQuote.classList.toggle('hidden', !showQuoteFullscreen.checked);
+            
+            // Tarayıcı tam ekran modu
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) {
+                document.documentElement.msRequestFullscreen();
+            }
+        }
+
+        // Tam ekran modundan çık
+        function exitFullscreen() {
+            fullscreenMode.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+
+        // Doğum günü kontrolü
+        function checkBirthday() {
+            if (!userProfile.birthday) return;
+            
+            const today = new Date();
+            const birthday = new Date(userProfile.birthday);
+            
+            if (today.getMonth() === birthday.getMonth() && today.getDate() === birthday.getDate()) {
+                birthdayNotification.style.display = 'block';
+                
+                // Özel arka plan
+                document.body.style.background = 'linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee)';
+                document.body.style.backgroundSize = '400% 400%';
+            } else {
+                birthdayNotification.style.display = 'none';
+            }
+            
+            // Yaş hesaplama
+            if (userProfile.birthday) {
+                const birthDate = new Date(userProfile.birthday);
+                const ageDiff = today - birthDate;
+                const ageDate = new Date(ageDiff);
+                const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+                profileAge.textContent = `Yaş: ${age}`;
+            }
+        }
+
+        // Event Listeners
+        soundBtn.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundBtn.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i> Ses Açık' : '<i class="fas fa-volume-mute"></i> Ses Kapalı';
+        });
+
+        resetBtn.addEventListener('click', () => {
+            targetAngle = 0;
+        });
+
+        fullscreenBtn.addEventListener('click', enterFullscreen);
+        exitFullscreenBtn.addEventListener('click', exitFullscreen);
+
+        themeBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            themeBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i> Açık Mod' : '<i class="fas fa-moon"></i> Koyu Mod';
+            localStorage.setItem('darkMode', isDarkMode);
+        });
+
+        // Saat modu değiştirme
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentClockMode = btn.dataset.mode;
+                
+                clockCanvas.classList.toggle('hidden', currentClockMode !== 'analog' && currentClockMode !== 'both');
+                digitalClock.classList.toggle('hidden', currentClockMode !== 'digital' && currentClockMode !== 'both');
+            });
+        });
+
+        // Takvim navigasyonu
+        prevMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        saveNoteBtn.addEventListener('click', saveNote);
+
+        // Profil kaydetme
+        saveProfileBtn.addEventListener('click', () => {
+            userProfile.name = userName.value;
+            userProfile.birthday = userBirthday.value;
+            userProfile.city = userCity.value;
+            
+            if (userProfile.name) {
+                profileName.textContent = userProfile.name;
+            }
+            
+            // Profil fotoğrafı yükleme
+            const file = profilePhoto.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userProfile.photo = e.target.result;
+                    profileImage.src = userProfile.photo;
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                };
+                reader.readAsDataURL(file);
+            } else {
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            }
+            
+            checkBirthday();
+            updateWeather();
+        });
+
+        // Pomodoro kontrolü
+        pomodoroStart.addEventListener('click', startPomodoro);
+        pomodoroPause.addEventListener('click', pausePomodoro);
+        pomodoroReset.addEventListener('click', resetPomodoro);
+
+        // Kronometre kontrolü
+        stopwatchStart.addEventListener('click', startStopwatch);
+        stopwatchPause.addEventListener('click', pauseStopwatch);
+        stopwatchReset.addEventListener('click', resetStopwatch);
+        stopwatchLap.addEventListener('click', lapStopwatch);
+
+        // Geri sayım kontrolü
+        timerStart.addEventListener('click', startTimer);
+        timerPause.addEventListener('click', pauseTimer);
+        timerReset.addEventListener('click', resetTimer);
+
+        // Rastgele söz butonu
+        newQuoteBtn.addEventListener('click', getRandomQuote);
+
+        // Hatırlatıcı ekleme
+        addReminderBtn.addEventListener('click', addReminder);
+
+        // Ses seviyeleri
+        tickVolume.addEventListener('input', () => {
+            localStorage.setItem('tickVolume', tickVolume.value);
+        });
+        
+        chimeVolume.addEventListener('input', () => {
+            localStorage.setItem('chimeVolume', chimeVolume.value);
+        });
+        
+        notificationVolume.addEventListener('input', () => {
+            localStorage.setItem('notificationVolume', notificationVolume.value);
+        });
+
+        // Arka plan efekti değiştirme
+        bgEffect.addEventListener('change', () => {
+            if (bgEffect.value === 'solid') {
+                document.body.style.background = solidColor.value;
+            } else if (bgEffect.value === 'gradient') {
+                document.body.style.background = 'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)';
+                document.body.style.backgroundSize = '400% 400%';
+            } else if (bgEffect.value === 'rgb') {
+                // RGB efekti için özel animasyon
+                document.body.style.background = 'linear-gradient(-45deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff)';
+                document.body.style.backgroundSize = '400% 400%';
+            }
+        });
+
+        solidColor.addEventListener('input', () => {
+            if (bgEffect.value === 'solid') {
+                document.body.style.background = solidColor.value;
+            }
+        });
+
+        // Tam ekran ayarları
+        fullscreenBg.addEventListener('input', () => {
+            fullscreenMode.style.backgroundColor = fullscreenBg.value;
+            localStorage.setItem('fullscreenBg', fullscreenBg.value);
+        });
+        
+        fullscreenColor.addEventListener('input', () => {
+            fullscreenClockDisplay.style.color = fullscreenColor.value;
+            fullscreenDateDisplay.style.color = fullscreenColor.value;
+            fullscreenWeather.style.color = fullscreenColor.value;
+            fullscreenQuote.style.color = fullscreenColor.value;
+            localStorage.setItem('fullscreenColor', fullscreenColor.value);
+        });
+        
+        showWeatherFullscreen.addEventListener('change', () => {
+            fullscreenWeather.classList.toggle('hidden', !showWeatherFullscreen.checked);
+            localStorage.setItem('showWeatherFullscreen', showWeatherFullscreen.checked);
+        });
+        
+        showQuoteFullscreen.addEventListener('change', () => {
+            fullscreenQuote.classList.toggle('hidden', !showQuoteFullscreen.checked);
+            localStorage.setItem('showQuoteFullscreen', showQuoteFullscreen.checked);
+        });
+
+        // Gradient seçenekleri
+        gradientPreviews.forEach(preview => {
+            preview.addEventListener('click', () => {
+                if (bgEffect.value === 'gradient') {
+                    document.body.style.background = getComputedStyle(preview).backgroundImage;
+                    document.body.style.backgroundSize = '400% 400%';
+                }
+            });
+        });
+
+        // Saat formatı değişikliği
+        hourFormat.addEventListener('change', () => {
+            updateDigitalClock();
+            updateWorldClocks();
+            localStorage.setItem('hourFormat', hourFormat.value);
+        });
+        
+        secondHand.addEventListener('change', () => {
+            localStorage.setItem('secondHand', secondHand.value);
+        });
+
+        // Saati döndürme (stres çarkı efekti)
+        clockCanvas.addEventListener('mousedown', (e) => {
+            dragging = true;
+            lastMouseX = e.clientX;
+            clockCanvas.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mouseup', () => {
+            dragging = false;
+            clockCanvas.style.cursor = 'grab';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (dragging) {
+                const dx = e.clientX - lastMouseX;
+                targetAngle += dx * 0.01;
+                lastMouseX = e.clientX;
+            }
+        });
+
+        // İnternet bağlantısı kontrolü
+        window.addEventListener('online', () => {
+            onlineStatus = true;
+            weatherError.classList.add('hidden');
+            updateWeather();
+        });
+
+        window.addEventListener('offline', () => {
+            onlineStatus = false;
+            weatherError.classList.remove('hidden');
+        });
+
+        // Animasyon döngüsü
+        function animate() {
+            rotationAngle += (targetAngle - rotationAngle) * 0.1;
+            
+            // Normal saat
+            drawClock(ctx, clockCanvas.width, clockCanvas.height, rotationAngle);
+            
+            // Dijital saati güncelle
+            updateDigitalClock();
+            
+            // Dünya saatlerini güncelle
+            updateWorldClocks();
+            
+            // Tarihi güncelle (saniyede bir)
+            const now = new Date();
+            if (now.getSeconds() === 0) {
+                updateDateDisplay();
+                
+                // Doğum günü kontrolü (dakikada bir)
+                if (now.getMinutes() === 0 && !birthdayChecked) {
+                    checkBirthday();
+                    birthdayChecked = true;
+                    
+                    // Reset bayrak
+                    setTimeout(() => {
+                        birthdayChecked = false;
+                    }, 61000);
+                }
+                
+                // Hava durumu güncelleme (30 dakikada bir)
+                if (now.getMinutes() % 30 === 0) {
+                    updateWeather();
+                }
+            }
+            
+            // Hatırlatıcıları kontrol et (her saniye)
+            checkReminders();
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Yükleme
+        window.addEventListener('load', () => {
+            // Sesleri başlat
+            initAudio();
+            
+            // LocalStorage'dan verileri yükle
+            const savedNotes = localStorage.getItem('notes');
+            if (savedNotes) {
+                notes = JSON.parse(savedNotes);
+                updateNotesList();
+            }
+            
+            const savedProfile = localStorage.getItem('userProfile');
+            if (savedProfile) {
+                userProfile = JSON.parse(savedProfile);
+                userName.value = userProfile.name;
+                userBirthday.value = userProfile.birthday;
+                userCity.value = userProfile.city;
+                profileName.textContent = userProfile.name;
+                
+                if (userProfile.photo) {
+                    profileImage.src = userProfile.photo;
+                }
+                
+                checkBirthday();
+                updateWeather();
+            }
+            
+            const savedDarkMode = localStorage.getItem('darkMode');
+            if (savedDarkMode === 'true') {
+                isDarkMode = true;
+                document.body.classList.add('dark-mode');
+                themeBtn.innerHTML = '<i class="fas fa-sun"></i> Açık Mod';
+            }
+            
+            const savedReminders = localStorage.getItem('reminders');
+            if (savedReminders) {
+                reminders = JSON.parse(savedReminders);
+                updateReminderList();
+            }
+            
+            const savedHourFormat = localStorage.getItem('hourFormat');
+            if (savedHourFormat) {
+                hourFormat.value = savedHourFormat;
+            }
+            
+            const savedSecondHand = localStorage.getItem('secondHand');
+            if (savedSecondHand) {
+                secondHand.value = savedSecondHand;
+            }
+            
+            const savedTickVolume = localStorage.getItem('tickVolume');
+            if (savedTickVolume) {
+                tickVolume.value = savedTickVolume;
+            }
+            
+            const savedChimeVolume = localStorage.getItem('chimeVolume');
+            if (savedChimeVolume) {
+                chimeVolume.value = savedChimeVolume;
+            }
+            
+            const savedNotificationVolume = localStorage.getItem('notificationVolume');
+            if (savedNotificationVolume) {
+                notificationVolume.value = savedNotificationVolume;
+            }
+            
+            const savedFullscreenBg = localStorage.getItem('fullscreenBg');
+            if (savedFullscreenBg) {
+                fullscreenBg.value = savedFullscreenBg;
+            }
+            
+            const savedFullscreenColor = localStorage.getItem('fullscreenColor');
+            if (savedFullscreenColor) {
+                fullscreenColor.value = savedFullscreenColor;
+            }
+            
+            const savedShowWeather = localStorage.getItem('showWeatherFullscreen');
+            if (savedShowWeather) {
+                showWeatherFullscreen.checked = savedShowWeather === 'true';
+            }
+            
+            const savedShowQuote = localStorage.getItem('showQuoteFullscreen');
+            if (savedShowQuote) {
+                showQuoteFullscreen.checked = savedShowQuote === 'true';
+            }
+            
+            // Takvimi oluştur
+            renderCalendar();
+            
+            // Rastgele bir motivasyon sözü seç
+            getRandomQuote();
+            
+            // Hava durumunu güncelle
+            updateWeather();
+            
+            // Animasyonu başlat
+            animate();
+        });
+    </script>
+</body>
+</html>

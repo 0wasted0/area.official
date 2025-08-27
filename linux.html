@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Area Official — Linux İndir</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="os-page linux-bg">
+  <header class="topbar small">
+    <div class="logo">Area Official — Linux</div>
+    <nav>
+      <a href="dashboard.html" class="navlink">Panel</a>
+      <a href="windows.html" class="navlink">Windows</a>
+      <a href="mac.html" class="navlink">Mac</a>
+      <a href="#" id="logoutLin" class="navlink">Çıkış</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>siteDEEP / site3 / site-tam — Linux</h2>
+      <p class="muted">Linux dağıtımlarında kullanım: .html dosyasını tarayıcı ile açabilir veya ihtiyaç varsa paketleyebilirsiniz.</p>
+
+      <div class="download-row">
+        <div class="download-card">
+          <div class="label">siteDEEP</div>
+          <p class="muted small">Tam sürüm — tüm özellikler.</p>
+          <button class="btn primary oval" onclick="downloadFromOS('siteDEEP.html')">İndir</button>
+        </div>
+
+        <div class="download-card">
+          <div class="label">site3 <span class="demo-badge">Demo</span></div>
+          <p class="muted small">Bazı özellikler demo olabilir.</p>
+          <button class="btn primary oval" onclick="downloadFromOS('site3.html')">İndir (Demo)</button>
+        </div>
+
+        <div class="download-card">
+          <div class="label">site-tam</div>
+          <p class="muted small">Hafif sürüm — temel özellikler.</p>
+          <button class="btn primary oval" onclick="downloadFromOS('site-tam.html')">İndir</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card tools">
+      <div class="tool">
+        <h3>Saat</h3>
+        <div id="clockLin" class="clock big"></div>
+      </div>
+
+      <div class="tool">
+        <h3>Kronometre</h3>
+        <div class="stopwatch">
+          <div id="swTimeLin">00:00:00.0</div>
+          <div class="row">
+            <button class="btn" id="swStartLin">Başlat</button>
+            <button class="btn" id="swStopLin">Dur</button>
+            <button class="btn" id="swResetLin">Sıfırla</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool">
+        <h3>Takvim</h3>
+        <div id="calendarLin"></div>
+        <div class="muted small">Güne tıklayarak not ekleyebilirsiniz; notlar tarayıcıda saklanır.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer small">© Area Official · Linux sayfası · Telif ve güvenlik uyarıları geçerlidir.</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

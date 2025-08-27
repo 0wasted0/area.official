@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Area Official — Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">Area Official</div>
+    <nav>
+      <a href="dashboard.html" class="navlink">Panel</a>
+      <a href="windows.html" class="navlink">Windows</a>
+      <a href="linux.html" class="navlink">Linux</a>
+      <a href="mac.html" class="navlink">Mac</a>
+      <a href="#" id="accountBtn" class="navlink">Hesap</a>
+      <a href="#" id="logoutBtn" class="navlink">Çıkış</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="grid-2">
+      <div class="card">
+        <h2>İndirilebilir Bölümler</h2>
+        <div class="os-cards">
+          <div class="os-card" style="background:linear-gradient(135deg,#2b6bff,#6b2bff)">
+            <h3>Windows</h3>
+            <p class="muted">Windows 10/11 uyumluluk bilgileri ve özel arka plan.</p>
+            <a class="btn primary" href="windows.html">Windows Sayfasına Git</a>
+          </div>
+
+          <div class="os-card" style="background:linear-gradient(135deg,#1ab36a,#00d4ff)">
+            <h3>Linux</h3>
+            <p class="muted">Ubuntu, Debian, Fedora için talimatlar.</p>
+            <a class="btn primary" href="linux.html">Linux Sayfasına Git</a>
+          </div>
+
+          <div class="os-card" style="background:linear-gradient(135deg,#ff7b00,#ff3d6b)">
+            <h3>Mac</h3>
+            <p class="muted">macOS uyumluluğu ve kullanım notları.</p>
+            <a class="btn primary" href="mac.html">Mac Sayfasına Git</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Kütüphanen</h2>
+        <ul id="libList" class="library-list"></ul>
+
+        <h3>Bildirimler</h3>
+        <ul id="notifList" class="notif-list"></ul>
+      </div>
+    </section>
+
+    <section class="card fullwidth">
+      <h2>Hızlı Bilgiler</h2>
+      <div class="info-grid">
+        <div>
+          <strong>Kullanıcı:</strong> <span id="currentUser"></span>
+        </div>
+        <div>
+          <strong>Toplam İndirilen:</strong> <span id="totalDownloads">0</span>
+        </div>
+        <div>
+          <strong>Telif:</strong> Tüm içerikler Area Official'e aittir veya sahibinin izniyle paylaşılmıştır.
+        </div>
+        <div class="muted small">Güvenlik: Bu offline versiyon demo amaçlıdır. Gerçek satış/ödeme için sunucu ve ödeme sağlayıcı entegrasyonu gereklidir.</div>
+      </div>
+    </section>
+  </main>
+
+  
+  <footer class="footer">
+    © 2025 Area Official · Tüm hakları saklıdır · Güvenlik ve telif uyarıları geçerlidir.
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

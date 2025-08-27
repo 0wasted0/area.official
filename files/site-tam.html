@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Saat Uygulaması</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #333;
+            --bg-color: #f9f9f9;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --accent-color: #e74c3c;
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --primary-color: #34495e;
+            --secondary-color: #2980b9;
+            --text-color: #ecf0f1;
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            --accent-color: #c0392b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .clock-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            grid-column: 2;
+        }
+
+        #clockCanvas {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            box-shadow: var(--shadow);
+            margin: 20px 0;
+            cursor: grab;
+            transition: transform 0.3s ease;
+        }
+
+        #clockCanvas:active {
+            cursor: grabbing;
+        }
+
+        .digital-clock {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+            color: var(--text-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .date-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        .fullscreen-btn {
+            background: var(--secondary-color);
+        }
+
+        .theme-btn {
+            background: var(--accent-color);
+        }
+
+        .profile-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .profile-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--secondary-color);
+        }
+
+        .profile-info h2 {
+            margin-bottom: 5px;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input, textarea {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
+        .calendar-panel h2, .notes-panel h2 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .calendar-header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: bold;
+            padding: 5px;
+        }
+
+        .calendar-day {
+            padding: 8px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .calendar-day.has-note {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .calendar-day:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .current-day {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .notes-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .note-date {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--bg-color);
+        }
+
+        .fullscreen-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .clock-mode-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            background: var(--primary-color);
+            color: white;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: var(--secondary-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .settings-panel {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .bg-preview {
+            width: 100%;
+            height: 100px;
+            border-radius: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .bg-option {
+            margin-bottom: 15px;
+        }
+
+        .birthday-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--accent-color);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .clock-container {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sol Panel - Profil -->
+        <div class="panel profile-panel">
+            <div class="profile-header">
+                <img src="https://via.placeholder.com/80" alt="Profil" class="profile-img" id="profileImage">
+                <div class="profile-info">
+                    <h2 id="profileName">Kullanıcı Adı</h2>
+                    <p id="profileAge">Yaş: 0</p>
+                </div>
+            </div>
+            <div class="profile-form">
+                <div class="form-group">
+                    <label for="userName">Ad Soyad</label>
+                    <input type="text" id="userName" placeholder="Adınız Soyadınız">
+                </div>
+                <div class="form-group">
+                    <label for="userBirthday">Doğum Tarihi</label>
+                    <input type="date" id="userBirthday">
+                </div>
+                <div class="form-group">
+                    <label for="profilePhoto">Profil Fotoğrafı</label>
+                    <input type="file" id="profilePhoto" accept="image/*">
+                </div>
+                <button class="btn" id="saveProfile"><i class="fas fa-save"></i> Profili Kaydet</button>
+            </div>
+        </div>
+
+        <!-- Orta Panel - Saat -->
+        <div class="clock-container panel">
+            <div class="date-display" id="dateDisplay">1 Ocak 2023, Pazar</div>
+            <canvas id="clockCanvas" width="400" height="400"></canvas>
+            <div class="digital-clock" id="digitalClock">00:00:00</div>
+            
+            <div class="clock-mode-selector">
+                <button class="mode-btn active" data-mode="analog">Analog</button>
+                <button class="mode-btn" data-mode="digital">Dijital</button>
+            </div>
+            
+            <div class="controls">
+                <button class="btn" id="soundBtn"><i class="fas fa-volume-up"></i> Ses</button>
+                <button class="btn" id="resetBtn"><i class="fas fa-undo"></i> Sıfırla</button>
+                <button class="btn fullscreen-btn" id="fullscreenBtn"><i class="fas fa-expand"></i> Tam Ekran</button>
+                <button class="btn theme-btn" id="themeBtn"><i class="fas fa-moon"></i> Koyu Mod</button>
+            </div>
+        </div>
+
+        <!-- Sağ Panel - Takvim ve Notlar -->
+        <div class="panel calendar-panel">
+            <h2>Takvim</h2>
+            <div class="calendar-header">
+                <button class="btn" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                <h3 id="currentMonth">Ocak 2023</h3>
+                <button class="btn" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar" id="calendar"></div>
+            
+            <h2>Notlar</h2>
+            <div id="selectedDate">Seçili Tarih: -</div>
+            <div class="form-group">
+                <textarea id="noteText" placeholder="Bu tarih için not ekleyin..." rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="noteImage">Fotoğraf Ekle</label>
+                <input type="file" id="noteImage" accept="image/*">
+            </div>
+            <button class="btn" id="saveNote"><i class="fas fa-save"></i> Notu Kaydet</button>
+            
+            <h3 style="margin-top: 20px;">Kayıtlı Notlar</h3>
+            <div class="notes-list" id="notesList"></div>
+        </div>
+
+        <!-- Ayarlar Paneli -->
+        <div class="panel settings-panel">
+            <h2>Ayarlar</h2>
+            <div class="settings-grid">
+                <div class="bg-option">
+                    <h3>Arka Plan Efekti</h3>
+                    <select id="bgEffect">
+                        <option value="gradient">Renk Geçişi</option>
+                        <option value="solid">Düz Renk</option>
+                        <option value="rgb">RGB Işık</option>
+                    </select>
+                    
+                    <div id="colorPicker" class="form-group">
+                        <label for="solidColor">Arka Plan Rengi</label>
+                        <input type="color" id="solidColor" value="#1a1a2e">
+                    </div>
+                </div>
+                
+                <div class="bg-option">
+                    <h3>Renk Geçişi Seçenekleri</h3>
+                    <div class="bg-preview" id="gradient1" style="background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);"></div>
+                    <div class="bg-preview" id="gradient2" style="background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);"></div>
+                    <div class="bg-preview" id="gradient3" style="background: linear-gradient(-45deg, #4facfe, #00f2fe, #a1c4fd, #c2e9fb);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tam Ekran Modu -->
+    <div class="fullscreen-mode hidden" id="fullscreenMode">
+        <div class="fullscreen-controls">
+            <button class="btn" id="exitFullscreenBtn"><i class="fas fa-compress"></i> Çıkış</button>
+        </div>
+        
+        <div class="analog-fullscreen hidden" id="analogFullscreen">
+            <canvas id="fullscreenClockCanvas" width="600" height="600"></canvas>
+        </div>
+        
+        <div class="digital-fullscreen hidden" id="digitalFullscreen">
+            <div class="digital-clock" id="fullscreenDigitalClock" style="font-size: 8rem;">00:00:00</div>
+            <div class="date-display" id="fullscreenDateDisplay" style="font-size: 2.5rem;">1 Ocak 2023, Pazar</div>
+        </div>
+    </div>
+
+    <!-- Doğum Günü Bildirimi -->
+    <div class="birthday-notification" id="birthdayNotification">
+        <i class="fas fa-birthday-cake"></i> Doğum gününüz kutlu olsun!
+    </div>
+
+    <script>
+        // DOM Elementleri
+        const clockCanvas = document.getElementById('clockCanvas');
+        const fullscreenClockCanvas = document.getElementById('fullscreenClockCanvas');
+        const ctx = clockCanvas.getContext('2d');
+        const fsCtx = fullscreenClockCanvas.getContext('2d');
+        const digitalClock = document.getElementById('digitalClock');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const fullscreenDigitalClock = document.getElementById('fullscreenDigitalClock');
+        const fullscreenDateDisplay = document.getElementById('fullscreenDateDisplay');
+        const soundBtn = document.getElementById('soundBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const exitFullscreenBtn = document.getElementById('exitFullscreenBtn');
+        const themeBtn = document.getElementById('themeBtn');
+        const fullscreenMode = document.getElementById('fullscreenMode');
+        const analogFullscreen = document.getElementById('analogFullscreen');
+        const digitalFullscreen = document.getElementById('digitalFullscreen');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const calendar = document.getElementById('calendar');
+        const currentMonthEl = document.getElementById('currentMonth');
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
+        const noteText = document.getElementById('noteText');
+        const saveNoteBtn = document.getElementById('saveNote');
+        const notesList = document.getElementById('notesList');
+        const selectedDateEl = document.getElementById('selectedDate');
+        const profileImage = document.getElementById('profileImage');
+        const profileName = document.getElementById('profileName');
+        const profileAge = document.getElementById('profileAge');
+        const userName = document.getElementById('userName');
+        const userBirthday = document.getElementById('userBirthday');
+        const profilePhoto = document.getElementById('profilePhoto');
+        const saveProfileBtn = document.getElementById('saveProfile');
+        const bgEffect = document.getElementById('bgEffect');
+        const solidColor = document.getElementById('solidColor');
+        const gradientPreviews = document.querySelectorAll('.bg-preview');
+        const birthdayNotification = document.getElementById('birthdayNotification');
+
+        // Değişkenler
+        let rotationAngle = 0;
+        let targetAngle = 0;
+        let dragging = false;
+        let lastMouseX = 0;
+        let soundEnabled = true;
+        let isDarkMode = false;
+        let currentDate = new Date();
+        let selectedDate = null;
+        let currentClockMode = 'analog';
+        let birthdayChecked = false;
+
+        // Saat verileri
+        const weekdays = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+        const months = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        // Program verileri
+        let program = [
+            {start:"05:30", end:"05:40", activity:"Esneme / hareket"},
+            {start:"05:40", end:"06:10", activity:"Kahvaltı"},
+            {start:"06:10", end:"06:30", activity:"Ders notlarına bak"},
+        ];
+
+        let userProfile = {
+            name: '',
+            birthday: null,
+            photo: null
+        };
+
+        let notes = {};
+
+        // Saat çizimi
+        function drawClock(ctx, width, height, rotation) {
+            const center = {x: width/2, y: height/2};
+            const radius = Math.min(width, height) / 2 - 20;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Saat dairesi
+            ctx.strokeStyle = isDarkMode ? '#ecf0f1' : '#2c3e50';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, radius, 0, Math.PI*2);
+            ctx.stroke();
+            
+            // Saat işaretleri
+            for(let i = 1; i <= 12; i++) {
+                const angle = ((i % 12) * 30 - 90) * Math.PI/180 + rotation;
+                const x = center.x + (radius - 30) * Math.cos(angle);
+                const y = center.y + (radius - 30) * Math.sin(angle);
+                
+                ctx.fillStyle = isDarkMode ? '#ecf0f1' : '#2c3e50';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i, x, y);
+            }
+            
+            const now = new Date();
+            const hour = now.getHours() % 12 + now.getMinutes() / 60;
+            const minute = now.getMinutes();
+            const second = now.getSeconds();
+            
+            // Saat kolu
+            let ha = ((hour * 30 - 90) * Math.PI/180) + rotation;
+            ctx.strokeStyle = isDarkMode ? '#3498db' : '#2980b9';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y);
+            ctx.lineTo(center.x + (radius - 60) * Math.cos(ha), center.y + (radius - 60) * Math.sin(ha));
+            ctx.stroke();
+            
+            // Dakika kolu
+            let ma = ((minute * 6 - 90) * Math.PI/180) + rotation;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y);
+            ctx.lineTo(center.x + (radius - 30) * Math.cos(ma), center.y + (radius - 30) * Math.sin(ma));
+            ctx.stroke();
+            
+            // Saniye kolu
+            let sa = ((second * 6 - 90) * Math.PI/180) + rotation;
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y);
+            ctx.lineTo(center.x + (radius - 20) * Math.cos(sa), center.y + (radius - 20) * Math.sin(sa));
+            ctx.stroke();
+            
+            // Merkez noktası
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, 8, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // Dijital saati güncelle
+        function updateDigitalClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            digitalClock.textContent = `${hours}:${minutes}:${seconds}`;
+            
+            if (!fullscreenMode.classList.contains('hidden')) {
+                fullscreenDigitalClock.textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        }
+
+        // Tarihi güncelle
+        function updateDateDisplay() {
+            const now = new Date();
+            const day = now.getDate();
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            const weekday = weekdays[now.getDay()];
+            
+            dateDisplay.textContent = `${day} ${month} ${year}, ${weekday}`;
+            
+            if (!fullscreenMode.classList.contains('hidden')) {
+                fullscreenDateDisplay.textContent = `${day} ${month} ${year}, ${weekday}`;
+            }
+        }
+
+        // Takvim oluştur
+        function renderCalendar() {
+            calendar.innerHTML = '';
+            
+            // Haftanın günleri
+            for (let i = 0; i < 7; i++) {
+                const weekdayEl = document.createElement('div');
+                weekdayEl.className = 'weekday';
+                weekdayEl.textContent = weekdays[i];
+                calendar.appendChild(weekdayEl);
+            }
+            
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+            const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+            
+            // Boş hücreler
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendar.appendChild(emptyDay);
+            }
+            
+            // Günler
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                dayEl.textContent = i;
+                
+                // Bugünü işaretle
+                if (i === today.getDate() && 
+                    currentDate.getMonth() === today.getMonth() && 
+                    currentDate.getFullYear() === today.getFullYear()) {
+                    dayEl.classList.add('current-day');
+                }
+                
+                // Not var mı kontrol et
+                const dateStr = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${i}`;
+                if (notes[dateStr]) {
+                    dayEl.classList.add('has-note');
+                }
+                
+                dayEl.addEventListener('click', () => {
+                    selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+                    selectedDateEl.textContent = `Seçili Tarih: ${i} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+                    
+                    // Notu yükle
+                    if (notes[dateStr]) {
+                        noteText.value = notes[dateStr].text || '';
+                    } else {
+                        noteText.value = '';
+                    }
+                });
+                
+                calendar.appendChild(dayEl);
+            }
+            
+            currentMonthEl.textContent = `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        }
+
+        // Notları kaydet
+        function saveNote() {
+            if (!selectedDate) {
+                alert('Lütfen bir tarih seçin.');
+                return;
+            }
+            
+            const dateStr = `${selectedDate.getFullYear()}-${selectedDate.getMonth() + 1}-${selectedDate.getDate()}`;
+            
+            if (!notes[dateStr]) {
+                notes[dateStr] = {};
+            }
+            
+            notes[dateStr].text = noteText.value;
+            
+            // Dosya yükleme
+            const imageFile = document.getElementById('noteImage').files[0];
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    notes[dateStr].image = e.target.result;
+                    updateNotesList();
+                    renderCalendar();
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                updateNotesList();
+                renderCalendar();
+            }
+            
+            // LocalStorage'a kaydet
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        // Not listesini güncelle
+        function updateNotesList() {
+            notesList.innerHTML = '';
+            
+            for (const date in notes) {
+                if (notes[date].text) {
+                    const noteItem = document.createElement('div');
+                    noteItem.className = 'note-item';
+                    
+                    const [year, month, day] = date.split('-');
+                    noteItem.innerHTML = `
+                        <div class="note-date">${day} ${months[parseInt(month)-1]} ${year}</div>
+                        <div class="note-text">${notes[date].text}</div>
+                    `;
+                    
+                    if (notes[date].image) {
+                        const img = document.createElement('img');
+                        img.src = notes[date].image;
+                        img.style.maxWidth = '100%';
+                        img.style.marginTop = '10px';
+                        img.style.borderRadius = '8px';
+                        noteItem.appendChild(img);
+                    }
+                    
+                    notesList.appendChild(noteItem);
+                }
+            }
+        }
+
+        // Doğum günü kontrolü
+        function checkBirthday() {
+            if (!userProfile.birthday) return;
+            
+            const today = new Date();
+            const birthday = new Date(userProfile.birthday);
+            
+            if (today.getMonth() === birthday.getMonth() && today.getDate() === birthday.getDate()) {
+                birthdayNotification.style.display = 'block';
+                
+                // Özel arka plan
+                document.body.style.background = 'linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee)';
+                document.body.style.backgroundSize = '400% 400%';
+            } else {
+                birthdayNotification.style.display = 'none';
+            }
+            
+            // Yaş hesaplama
+            if (userProfile.birthday) {
+                const birthDate = new Date(userProfile.birthday);
+                const ageDiff = today - birthDate;
+                const ageDate = new Date(ageDiff);
+                const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+                profileAge.textContent = `Yaş: ${age}`;
+            }
+        }
+
+        // Event Listeners
+        soundBtn.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundBtn.innerHTML = soundEnabled ? '<i class="fas fa-volume-up"></i> Ses Açık' : '<i class="fas fa-volume-mute"></i> Ses Kapalı';
+        });
+
+        resetBtn.addEventListener('click', () => {
+            targetAngle = 0;
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            fullscreenMode.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            if (currentClockMode === 'analog') {
+                analogFullscreen.classList.remove('hidden');
+                digitalFullscreen.classList.add('hidden');
+            } else {
+                analogFullscreen.classList.add('hidden');
+                digitalFullscreen.classList.remove('hidden');
+            }
+        });
+
+        exitFullscreenBtn.addEventListener('click', () => {
+            fullscreenMode.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+
+        themeBtn.addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            themeBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i> Açık Mod' : '<i class="fas fa-moon"></i> Koyu Mod';
+            localStorage.setItem('darkMode', isDarkMode);
+        });
+
+        // Saat modu değiştirme
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentClockMode = btn.dataset.mode;
+                
+                if (fullscreenMode.classList.contains('hidden')) {
+                    clockCanvas.classList.toggle('hidden', currentClockMode !== 'analog');
+                    digitalClock.classList.toggle('hidden', currentClockMode !== 'digital');
+                } else {
+                    analogFullscreen.classList.toggle('hidden', currentClockMode !== 'analog');
+                    digitalFullscreen.classList.toggle('hidden', currentClockMode !== 'digital');
+                }
+            });
+        });
+
+        // Takvim navigasyonu
+        prevMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        saveNoteBtn.addEventListener('click', saveNote);
+
+        // Profil kaydetme
+        saveProfileBtn.addEventListener('click', () => {
+            userProfile.name = userName.value;
+            userProfile.birthday = userBirthday.value;
+            
+            if (userProfile.name) {
+                profileName.textContent = userProfile.name;
+            }
+            
+            // Profil fotoğrafı yükleme
+            const file = profilePhoto.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    userProfile.photo = e.target.result;
+                    profileImage.src = userProfile.photo;
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                };
+                reader.readAsDataURL(file);
+            } else {
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            }
+            
+            checkBirthday();
+        });
+
+        // Arka plan efekti değiştirme
+        bgEffect.addEventListener('change', () => {
+            if (bgEffect.value === 'solid') {
+                document.body.style.background = solidColor.value;
+            } else if (bgEffect.value === 'gradient') {
+                document.body.style.background = 'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)';
+                document.body.style.backgroundSize = '400% 400%';
+            }
+        });
+
+        solidColor.addEventListener('input', () => {
+            if (bgEffect.value === 'solid') {
+                document.body.style.background = solidColor.value;
+            }
+        });
+
+        // Gradient seçenekleri
+        gradientPreviews.forEach(preview => {
+            preview.addEventListener('click', () => {
+                if (bgEffect.value === 'gradient') {
+                    document.body.style.background = getComputedStyle(preview).backgroundImage;
+                    document.body.style.backgroundSize = '400% 400%';
+                }
+            });
+        });
+
+        // Saati döndürme (stres çarkı efekti)
+        clockCanvas.addEventListener('mousedown', (e) => {
+            dragging = true;
+            lastMouseX = e.clientX;
+            clockCanvas.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mouseup', () => {
+            dragging = false;
+            clockCanvas.style.cursor = 'grab';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (dragging) {
+                const dx = e.clientX - lastMouseX;
+                targetAngle += dx * 0.01;
+                lastMouseX = e.clientX;
+            }
+        });
+
+        // Animasyon döngüsü
+        function animate() {
+            rotationAngle += (targetAngle - rotationAngle) * 0.1;
+            
+            // Normal saat
+            drawClock(ctx, clockCanvas.width, clockCanvas.height, rotationAngle);
+            
+            // Tam ekran saat
+            if (!fullscreenMode.classList.contains('hidden') && currentClockMode === 'analog') {
+                drawClock(fsCtx, fullscreenClockCanvas.width, fullscreenClockCanvas.height, rotationAngle);
+            }
+            
+            // Dijital saati güncelle
+            updateDigitalClock();
+            
+            // Tarihi güncelle (saniyede bir)
+            const now = new Date();
+            if (now.getSeconds() === 0) {
+                updateDateDisplay();
+                
+                // Doğum günü kontrolü (dakikada bir)
+                if (now.getMinutes() === 0 && !birthdayChecked) {
+                    checkBirthday();
+                    birthdayChecked = true;
+                    
+                    // Reset bayrak
+                    setTimeout(() => {
+                        birthdayChecked = false;
+                    }, 61000);
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Yükleme
+        window.addEventListener('load', () => {
+            // LocalStorage'dan verileri yükle
+            const savedNotes = localStorage.getItem('notes');
+            if (savedNotes) {
+                notes = JSON.parse(savedNotes);
+                updateNotesList();
+            }
+            
+            const savedProfile = localStorage.getItem('userProfile');
+            if (savedProfile) {
+                userProfile = JSON.parse(savedProfile);
+                userName.value = userProfile.name;
+                userBirthday.value = userProfile.birthday;
+                profileName.textContent = userProfile.name;
+                
+                if (userProfile.photo) {
+                    profileImage.src = userProfile.photo;
+                }
+                
+                checkBirthday();
+            }
+            
+            const savedDarkMode = localStorage.getItem('darkMode');
+            if (savedDarkMode === 'true') {
+                isDarkMode = true;
+                document.body.classList.add('dark-mode');
+                themeBtn.innerHTML = '<i class="fas fa-sun"></i> Açık Mod';
+            }
+            
+            // Takvimi oluştur
+            renderCalendar();
+            
+            // Animasyonu başlat
+            animate();
+            
+            // Dijital saati güncelle
+            setInterval(updateDigitalClock, 1000);
+        });
+    </script>
+</body>
+</html>
